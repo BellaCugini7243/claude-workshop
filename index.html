@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+      font-family: system-ui, sans-serif;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 2rem;
+      width: 340px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #1a1a1a;
+    }
+
+    .inputs {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .ops {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    button {
+      padding: 0.65rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #6366f1;
+      color: #fff;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:hover { background: #4f46e5; }
+    button:active { transform: scale(0.97); }
+
+    .result {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+      color: #1a1a1a;
+      min-height: 2.8rem;
+    }
+
+    .result.error { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Calculator</h1>
+    <div class="inputs">
+      <input type="number" id="a" placeholder="a" />
+      <input type="number" id="b" placeholder="b" />
+    </div>
+    <div class="ops">
+      <button onclick="calc('add')">a + b</button>
+      <button onclick="calc('subtract')">a − b</button>
+      <button onclick="calc('multiply')">a × b</button>
+      <button onclick="calc('divide')">a ÷ b</button>
+      <button onclick="calc('power')" style="grid-column: span 2">a ^ b</button>
+    </div>
+    <div class="result" id="result">—</div>
+  </div>
+
+  <script>
+    function getInputs() {
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      return { a, b };
+    }
+
+    function setResult(value, isError = false) {
+      const el = document.getElementById('result');
+      el.textContent = value;
+      el.className = 'result' + (isError ? ' error' : '');
+    }
+
+    const ops = {
+      add:      (a, b) => a + b,
+      subtract: (a, b) => a - b,
+      multiply: (a, b) => a * b,
+      divide:   (a, b) => {
+        if (b === 0) throw new Error('Cannot divide by zero.');
+        return a / b;
+      },
+      power:    (a, b) => Math.pow(a, b),
+    };
+
+    const symbols = { add: '+', subtract: '−', multiply: '×', divide: '÷', power: '^' };
+
+    function calc(op) {
+      const { a, b } = getInputs();
+      if (isNaN(a) || isNaN(b)) {
+        setResult('Enter values for a and b.', true);
+        return;
+      }
+      try {
+        const result = ops[op](a, b);
+        const r = Number.isInteger(result) ? result : parseFloat(result.toFixed(10));
+        setResult(`${a} ${symbols[op]} ${b} = ${r}`);
+      } catch (e) {
+        setResult(e.message, true);
+      }
+    }
+  </script>
+</body>
+</html>
