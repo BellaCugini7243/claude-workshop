@@ -12,141 +12,256 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f0f2f5;
+      background: #1a1a2e;
       font-family: system-ui, sans-serif;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      padding: 2rem;
-      width: 340px;
+    .calc {
+      background: #222;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
+      padding: 20px;
+      width: 300px;
     }
 
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      color: #1a1a1a;
-    }
-
-    .inputs {
+    /* Display */
+    .display {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      min-height: 90px;
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      border: 1px solid #333;
     }
 
-    input[type="number"] {
-      flex: 1;
-      padding: 0.6rem 0.8rem;
-      border: 1.5px solid #d1d5db;
-      border-radius: 8px;
+    .display .expression {
+      font-size: 0.85rem;
+      color: #666;
+      min-height: 1.2em;
+      word-break: break-all;
+      text-align: right;
+    }
+
+    .display .value {
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: #fff;
+      word-break: break-all;
+      text-align: right;
+      line-height: 1.1;
+    }
+
+    .display .value.error {
       font-size: 1rem;
-      transition: border-color 0.15s;
-      -moz-appearance: textfield;
+      color: #f87171;
     }
 
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
-
-    .ops {
+    /* Button grid */
+    .buttons {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-      margin-bottom: 1.25rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
     }
 
     button {
-      padding: 0.65rem;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
       font-weight: 500;
       cursor: pointer;
-      background: #6366f1;
+      height: 58px;
+      transition: filter 0.1s, transform 0.08s;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+    }
+
+    /* Number buttons */
+    .btn-num {
+      background: #3a3a3a;
       color: #fff;
-      transition: background 0.15s, transform 0.1s;
     }
+    .btn-num:hover { filter: brightness(1.2); }
 
-    button:hover { background: #4f46e5; }
-    button:active { transform: scale(0.97); }
-
-    .result {
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-size: 1.1rem;
-      color: #1a1a1a;
-      min-height: 2.8rem;
+    /* Operator buttons */
+    .btn-op {
+      background: #f59e0b;
+      color: #fff;
     }
+    .btn-op:hover { filter: brightness(1.1); }
+    .btn-op.active { background: #fff; color: #f59e0b; }
 
-    .result.error { color: #dc2626; }
+    /* Power button */
+    .btn-pow {
+      background: #8b5cf6;
+      color: #fff;
+    }
+    .btn-pow:hover { filter: brightness(1.1); }
+    .btn-pow.active { background: #fff; color: #8b5cf6; }
+
+    /* Utility buttons */
+    .btn-util {
+      background: #555;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    .btn-util:hover { filter: brightness(1.2); }
+
+    /* Equals */
+    .btn-eq {
+      background: #f59e0b;
+      color: #fff;
+      font-size: 1.4rem;
+    }
+    .btn-eq:hover { filter: brightness(1.1); }
+
+    /* Span two columns */
+    .span2 { grid-column: span 2; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Calculator</h1>
-    <div class="inputs">
-      <input type="number" id="a" placeholder="a" />
-      <input type="number" id="b" placeholder="b" />
+  <div class="calc">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="value" id="display">0</div>
     </div>
-    <div class="ops">
-      <button onclick="calc('add')">a + b</button>
-      <button onclick="calc('subtract')">a − b</button>
-      <button onclick="calc('multiply')">a × b</button>
-      <button onclick="calc('divide')">a ÷ b</button>
-      <button onclick="calc('power')" style="grid-column: span 2">a ^ b</button>
+
+    <div class="buttons">
+      <!-- Row 1 -->
+      <button class="btn-util span2" onclick="clearAll()">AC</button>
+      <button class="btn-util" onclick="backspace()">⌫</button>
+      <button class="btn-op" id="op-divide" onclick="setOp('divide')">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn-num" onclick="input('7')">7</button>
+      <button class="btn-num" onclick="input('8')">8</button>
+      <button class="btn-num" onclick="input('9')">9</button>
+      <button class="btn-op" id="op-multiply" onclick="setOp('multiply')">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn-num" onclick="input('4')">4</button>
+      <button class="btn-num" onclick="input('5')">5</button>
+      <button class="btn-num" onclick="input('6')">6</button>
+      <button class="btn-op" id="op-subtract" onclick="setOp('subtract')">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn-num" onclick="input('1')">1</button>
+      <button class="btn-num" onclick="input('2')">2</button>
+      <button class="btn-num" onclick="input('3')">3</button>
+      <button class="btn-op" id="op-add" onclick="setOp('add')">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn-pow" id="op-power" onclick="setOp('power')">xʸ</button>
+      <button class="btn-num" onclick="input('0')">0</button>
+      <button class="btn-num" onclick="input('.')">.</button>
+      <button class="btn-eq" onclick="calculate()">=</button>
     </div>
-    <div class="result" id="result">—</div>
   </div>
 
   <script>
-    function getInputs() {
-      const a = parseFloat(document.getElementById('a').value);
-      const b = parseFloat(document.getElementById('b').value);
-      return { a, b };
-    }
-
-    function setResult(value, isError = false) {
-      const el = document.getElementById('result');
-      el.textContent = value;
-      el.className = 'result' + (isError ? ' error' : '');
-    }
+    let current = '0';
+    let operand = null;
+    let operator = null;
+    let justCalc = false;
 
     const ops = {
       add:      (a, b) => a + b,
       subtract: (a, b) => a - b,
       multiply: (a, b) => a * b,
-      divide:   (a, b) => {
-        if (b === 0) throw new Error('Cannot divide by zero.');
-        return a / b;
-      },
+      divide:   (a, b) => { if (b === 0) throw new Error('Cannot divide by zero'); return a / b; },
       power:    (a, b) => Math.pow(a, b),
     };
-
     const symbols = { add: '+', subtract: '−', multiply: '×', divide: '÷', power: '^' };
 
-    function calc(op) {
-      const { a, b } = getInputs();
-      if (isNaN(a) || isNaN(b)) {
-        setResult('Enter values for a and b.', true);
-        return;
-      }
-      try {
-        const result = ops[op](a, b);
-        const r = Number.isInteger(result) ? result : parseFloat(result.toFixed(10));
-        setResult(`${a} ${symbols[op]} ${b} = ${r}`);
-      } catch (e) {
-        setResult(e.message, true);
-      }
+    function updateDisplay(val, expr = '', isError = false) {
+      const d = document.getElementById('display');
+      d.textContent = val;
+      d.className = 'value' + (isError ? ' error' : '');
+      document.getElementById('expression').textContent = expr;
     }
+
+    function input(ch) {
+      if (justCalc) { current = '0'; justCalc = false; }
+      if (ch === '.' && current.includes('.')) return;
+      current = (current === '0' && ch !== '.') ? ch : current + ch;
+      updateDisplay(current);
+    }
+
+    function setOp(op) {
+      justCalc = false;
+      // Chain: if already have operand + operator, evaluate first
+      if (operand !== null && operator && !justCalc) {
+        try {
+          const result = ops[operator](parseFloat(operand), parseFloat(current));
+          current = fmt(result);
+        } catch (e) {
+          updateDisplay(e.message, '', true);
+          operand = null; operator = null;
+          return;
+        }
+      }
+      operand = current;
+      operator = op;
+      current = '0';
+      updateDisplay('0', `${operand} ${symbols[op]}`);
+      // Highlight active op button
+      document.querySelectorAll('.btn-op, .btn-pow').forEach(b => b.classList.remove('active'));
+      document.getElementById('op-' + op).classList.add('active');
+    }
+
+    function calculate() {
+      if (operand === null || operator === null) return;
+      const a = parseFloat(operand), b = parseFloat(current);
+      const expr = `${operand} ${symbols[operator]} ${current} =`;
+      try {
+        const result = ops[operator](a, b);
+        current = fmt(result);
+        updateDisplay(current, expr);
+      } catch (e) {
+        updateDisplay(e.message, expr, true);
+      }
+      operand = null; operator = null; justCalc = true;
+      document.querySelectorAll('.btn-op, .btn-pow').forEach(b => b.classList.remove('active'));
+    }
+
+    function clearAll() {
+      current = '0'; operand = null; operator = null; justCalc = false;
+      updateDisplay('0', '');
+      document.querySelectorAll('.btn-op, .btn-pow').forEach(b => b.classList.remove('active'));
+    }
+
+    function backspace() {
+      if (justCalc) return;
+      current = current.length > 1 ? current.slice(0, -1) : '0';
+      updateDisplay(current);
+    }
+
+    function fmt(n) {
+      if (!isFinite(n)) return 'Error';
+      const s = parseFloat(n.toFixed(10)).toString();
+      return s;
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', e => {
+      if (e.key >= '0' && e.key <= '9') input(e.key);
+      else if (e.key === '.') input('.');
+      else if (e.key === '+') setOp('add');
+      else if (e.key === '-') setOp('subtract');
+      else if (e.key === '*') setOp('multiply');
+      else if (e.key === '/') { e.preventDefault(); setOp('divide'); }
+      else if (e.key === '^') setOp('power');
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Backspace') backspace();
+      else if (e.key === 'Escape') clearAll();
+    });
   </script>
 </body>
 </html>
